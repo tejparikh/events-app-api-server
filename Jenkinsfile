@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Retrieving source from github' 
                 git branch: 'main',
-                    url: '[GITREPO]'
+                    url: 'https://github.com/tejparikh/events-app-api-server.git'
                 echo 'Did we get the source?' 
                 sh 'ls -a'
             }
@@ -27,9 +27,8 @@ pipeline {
                 echo 'workspace and versions' 
                 sh 'echo $WORKSPACE'
                 sh 'gcloud version'
-                sh 'nodejs -v'
-                sh 'npm -v'
-        
+                sh 'node -v'
+                sh 'npm -v'        
             }
         }        
          stage('Stage 3') {
@@ -48,16 +47,16 @@ pipeline {
             steps {
                 echo "build id = ${env.BUILD_ID}"
                 echo 'Tests passed on to build Docker container'
-                sh "gcloud builds submit -t gcr.io/[PROJECTID]/api-server:v2.${env.BUILD_ID} ."
+                sh "gcloud builds submit -t gcr.io/roidtcmar109/api-server:v2.${env.BUILD_ID} ."
             }
         }        
          stage('Stage 5') {
             steps {
                 echo 'Get cluster credentials'
-                sh 'gcloud container clusters get-credentials [CLUSTER_NAME] --zone [ZONE] --project [PROJECTID]'
+                sh 'gcloud container clusters get-credentials cnd-tej --zone us-central1-c --project roidtcmar109'
                 echo 'Update the image'
-                echo "gcr.io/[PROJECTID]/internal:2.${env.BUILD_ID}"
-                sh "kubectl set image deployment/[DEPLOYMENT_NAME] [CONTAINER_NAME]=gcr.io/[PROJECTID]/api-server:v2.${env.BUILD_ID} --record"
+                echo "gcr.io/roidtcmar109/internal:2.${env.BUILD_ID}"
+                sh "kubectl set image deployment/demo-api demo-api=gcr.io/roidtcmar109/api-server:v2.${env.BUILD_ID} --record"
             }
         }
     }
